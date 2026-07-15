@@ -1,5 +1,5 @@
 var map = L.map('map', {
-    zoom: 10,
+    zoom: 9,
     minZoom: 7,      // (optional) prevents zooming in beyond level 19
     center: L.latLng([63.93, -21.66]), // Reykjanes peninsula, Iceland
     attributionControl: true,
@@ -163,7 +163,8 @@ function createSiteLayer(data, options) {
             });
             const name = (feature.properties && feature.properties.Name) || settings.label;
             if (settings.showLabels) {
-                visibleMarker.bindTooltip(name, { permanent: true, direction: 'top', className: 'mt-label' });
+                const labelText = name.replace(/[^0-9]/g, '') || name;
+                visibleMarker.bindTooltip(labelText, { permanent: true, direction: 'top', className: 'mt-label' });
             }
             return L.layerGroup([addTouchTarget(visibleMarker, latlng, ""), visibleMarker]);
         },
@@ -534,6 +535,12 @@ L.control.panelLayers(baseLayers, groupedOverlays, {
     selectorGroup: true, // adds a group checkbox that toggles every layer in that group at once
     position: 'topright'
 }).addTo(map);
+
+// The plugin applies selectorGroup to every group; drop it for "Survey Sites" only
+// (2026 sites should stay visible by default, not get bulk-toggled with the rest).
+document.querySelectorAll('.leaflet-panel-layers-selector[name="Survey Sites"]').forEach(function (el) {
+    el.remove();
+});
 
 createSiteSearchControl(plannedSites2026AllLayer, {
     label: 'Search sites',
