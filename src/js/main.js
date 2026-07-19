@@ -343,6 +343,8 @@ L.easyButton({
     }]
 }).addTo(map);
 
+const popupTitle = (title) => `<div style="font-weight:bold; margin-bottom:4px; border-bottom:1px solid #aaa; padding-bottom:2px;">${title}</div>`;
+
 const powerMajorLayer = L.geoJSON(powerMajor, {
     style: {
         color: '#e31a1c',
@@ -350,7 +352,7 @@ const powerMajorLayer = L.geoJSON(powerMajor, {
     },
     onEachFeature: function (feature, layer) {
         const p = feature.properties;
-        layer.bindPopup(`<b>Name:</b> ${p.name || "-"}<br><b>Voltage:</b> ${p.voltage || "-"} V<br><b>Operator:</b> ${p.operator || "-"}`);
+        layer.bindPopup(`${popupTitle('Major Powerline')}<b>Name:</b> ${p.name || "-"}<br><b>Voltage:</b> ${p.voltage || "-"} V<br><b>Operator:</b> ${p.operator || "-"}`);
     }
 });
 
@@ -361,7 +363,7 @@ const powerMinorLayer = L.geoJSON(powerMinor, {
     },
     onEachFeature: function (feature, layer) {
         const p = feature.properties;
-        layer.bindPopup(`<b>Name:</b> ${p.name || "-"}<br><b>Voltage:</b> ${p.voltage || "-"} V<br><b>Operator:</b> ${p.operator || "-"}`);
+        layer.bindPopup(`${popupTitle('Minor Powerline')}<b>Name:</b> ${p.name || "-"}<br><b>Voltage:</b> ${p.voltage || "-"} V<br><b>Operator:</b> ${p.operator || "-"}`);
     }
 });
 
@@ -372,7 +374,7 @@ const powerUndergroundLayer = L.geoJSON(powerUnderground, {
     },
     onEachFeature: function (feature, layer) {
         const p = feature.properties;
-        layer.bindPopup(`<b>Name:</b> ${p.name || "-"}<br><b>Type:</b> ${p.power || "-"}<br><b>Operator:</b> ${p.operator || "-"}`);
+        layer.bindPopup(`${popupTitle('Underground Powerline')}<b>Name:</b> ${p.name || "-"}<br><b>Type:</b> ${p.power || "-"}<br><b>Operator:</b> ${p.operator || "-"}`);
     }
 });
 
@@ -386,7 +388,7 @@ const powerplantsLayer = L.geoJSON(powerplants, {
     onEachFeature: function (feature, layer) {
         const p = feature.properties;
         const name = p.name || p['name:is'] || p['name:en'] || 'Power plant';
-        layer.bindPopup(`<b>Name:</b> ${name}<br><b>Type:</b> ${p.power || "-"}<br><b>Source:</b> ${p['plant:source'] || "-"}<br><b>Operator:</b> ${p.operator || "-"}`);
+        layer.bindPopup(`${popupTitle('Power Plant')}<b>Name:</b> ${name}<br><b>Type:</b> ${p.power || "-"}<br><b>Source:</b> ${p['plant:source'] || "-"}<br><b>Operator:</b> ${p.operator || "-"}`);
     }
 });
 
@@ -398,7 +400,7 @@ const pipelinesLayer = L.geoJSON(pipelines, {
     },
     onEachFeature: function (feature, layer) {
         const p = feature.properties;
-        layer.bindPopup(`<b>Name:</b> ${p.name || "-"}<br><b>Substance:</b> ${p.substance || "-"}<br><b>Operator:</b> ${p.operator || "-"}`);
+        layer.bindPopup(`${popupTitle('Pipeline')}<b>Name:</b> ${p.name || "-"}<br><b>Substance:</b> ${p.substance || "-"}<br><b>Operator:</b> ${p.operator || "-"}`);
     }
 });
 
