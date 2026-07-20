@@ -3,11 +3,57 @@ var map = L.map('map', {
     minZoom: 7,      // (optional) prevents zooming in beyond level 19
     center: L.latLng([63.93, -21.66]), // Reykjanes peninsula, Iceland
     attributionControl: true,
+    contextmenu: true,
+    contextmenuWidth: 180,
+    contextmenuItems: [{
+        text: 'Copy coordinates (Lat, Long)',
+        callback: copyCoordinates
+    }],
     fullscreenControl: true,
     fullscreenControlOptions: {
         position: 'topleft',
     },
 });
+
+function copyCoordinates(event) {
+    const coordinates = `${event.latlng.lat.toFixed(6)}, ${event.latlng.lng.toFixed(6)}`;
+
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(coordinates)
+            .then(function () {
+                notification.success('Copied', coordinates);
+            })
+            .catch(function () {
+                copyCoordinatesFallback(coordinates);
+            });
+        return;
+    }
+
+    copyCoordinatesFallback(coordinates);
+}
+
+function copyCoordinatesFallback(coordinates) {
+    const textArea = document.createElement('textarea');
+    textArea.value = coordinates;
+    textArea.setAttribute('readonly', '');
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    document.body.appendChild(textArea);
+    textArea.select();
+
+    try {
+        if (document.execCommand('copy')) {
+            notification.success('Copied', coordinates);
+        } else {
+            notification.alert('Copy failed', 'Unable to copy coordinates');
+        }
+    } catch (error) {
+        notification.alert('Copy failed', 'Unable to copy coordinates');
+    }
+
+    document.body.removeChild(textArea);
+}
+
 L.control.locate().addTo(map);
 
 map.attributionControl.setPrefix('<a href="https://leafletjs.com" title="A JavaScript library for interactive maps">Leaflet ' + L.version + '</a>');
