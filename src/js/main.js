@@ -238,7 +238,7 @@ function createXSiteLayer(data, options) {
     const settings = Object.assign({ color: '#000', label: 'Site' }, options || {});
     return L.geoJson(data, {
         pointToLayer: function (feature, latlng) {
-            return L.marker(latlng, {
+            const marker = L.marker(latlng, {
                 icon: L.divIcon({
                     className: 'mt-x-marker',
                     html: `<span style="color:${settings.color};">&times;</span>`,
@@ -246,6 +246,12 @@ function createXSiteLayer(data, options) {
                     iconAnchor: [10, 10]
                 })
             });
+            if (settings.showLabels) {
+                const name = (feature.properties && feature.properties.Name) || settings.label;
+                const labelText = name.replace(/[^0-9]/g, '') || name;
+                marker.bindTooltip(labelText, { permanent: true, direction: 'top', className: 'mt-label' });
+            }
+            return marker;
         },
         onEachFeature: function (feature, layer) {
             const latLng = layer.getLatLng();
@@ -271,7 +277,7 @@ var plannedSites2026DifficultLayer = createSiteLayer(plannedSites2026Difficult, 
 
 // All other sites: X symbols, each a different color
 var sites2024Layer = createXSiteLayer(sites2024, { color: '#33a02c', label: '2024 Site' });
-var yearlyRepeatSitesLayer = createXSiteLayer(yearlyRepeatSites, { color: '#b15928', label: 'Yearly Repeat Site' });
+var yearlyRepeatSitesLayer = createXSiteLayer(yearlyRepeatSites, { color: '#b15928', label: 'Yearly Repeat Site', showLabels: true });
 var permanentSitesLayer = createXSiteLayer(permanentSites, { color: '#6a3d9a', label: 'Permanent Site' });
 var hsOrkaExistingSitesLayer = createXSiteLayer(hsOrkaExistingSites, { color: '#ff7f00', label: 'HS Orka Existing Site' });
 
@@ -573,9 +579,10 @@ var groupedOverlays = [
     }
 ];
 
-// Only the 2026 planned sites are visible by default; everything else is opt-in via the layer panel
+// The 2026 planned sites and yearly repeat sites are visible by default; everything else is opt-in via the layer panel
 plannedSites2026AllLayer.addTo(map);
 plannedSites2026DifficultLayer.addTo(map);
+yearlyRepeatSitesLayer.addTo(map);
 
 L.control.panelLayers(baseLayers, groupedOverlays, {
     compact: true, // true = collapsed groups by default
