@@ -5,10 +5,10 @@
 
 //  var runningSites = [545, 6144];
 
-var runningSites = [672, 650, 655, 
-                    656, 666, 675, 
-                    674, 652, 676, 
-                    678, 622, 653];
+var runningSites = [572, 550, 555, 
+                    556, 566, 575, 
+                    574, 552, 576, 
+                    578, 522, 553];
 
 var completedSites = [
 
