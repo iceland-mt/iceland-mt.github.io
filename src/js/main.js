@@ -270,16 +270,90 @@ function createXSiteLayer(data, options) {
     });
 }
 
+// Status overlays: completed/running sites are looked up by number (the digits in
+// "Name", e.g. "REK-681" -> 681) across the 2026 planned sites and yearly repeat sites.
+// Those same sites are excluded from the underlying layers below so a site only ever
+// shows once, as its status marker rather than its original planned/repeat marker.
+var siteSourceCollections = [plannedSites2026All, plannedSites2026Difficult, yearlyRepeatSites];
+var statusSiteNumbers = (completedSites || []).concat(runningSites || []);
+
+function findSiteFeatureByNumber(number, collections) {
+    const target = String(number).trim();
+    for (const collection of collections) {
+        const features = (collection && collection.features) || [];
+        for (const feature of features) {
+            const name = feature.properties && feature.properties.Name;
+            if (!name) continue;
+            if (String(name).replace(/[^0-9]/g, '') === target) {
+                return feature;
+            }
+        }
+    }
+    return null;
+}
+
+function excludeSitesByNumber(data, numbers) {
+    const excluded = new Set((numbers || []).map(function (n) { return String(n).trim(); }));
+    if (!excluded.size || !data || !data.features) return data;
+    return Object.assign({}, data, {
+        features: data.features.filter(function (feature) {
+            const name = feature.properties && feature.properties.Name;
+            const digits = name ? String(name).replace(/[^0-9]/g, '') : '';
+            return !excluded.has(digits);
+        })
+    });
+}
+
 // Create site layers
 // 2026 planned sites: circles (blue = all, red = difficult access), names always visible
-var plannedSites2026AllLayer = createSiteLayer(plannedSites2026All, { color: '#1f78b4', radius: 7, label: '2026 Planned Site', showLabels: true });
-var plannedSites2026DifficultLayer = createSiteLayer(plannedSites2026Difficult, { color: '#e31a1c', radius: 7, label: 'Difficult Access Site', showLabels: true });
+var plannedSites2026AllLayer = createSiteLayer(excludeSitesByNumber(plannedSites2026All, statusSiteNumbers), { color: '#1f78b4', radius: 7, label: '2026 Planned Site', showLabels: true });
+var plannedSites2026DifficultLayer = createSiteLayer(excludeSitesByNumber(plannedSites2026Difficult, statusSiteNumbers), { color: '#e31a1c', radius: 7, label: 'Difficult Access Site', showLabels: true });
 
 // All other sites: X symbols, each a different color
 var sites2024Layer = createXSiteLayer(sites2024, { color: '#33a02c', label: '2024 Site' });
-var yearlyRepeatSitesLayer = createXSiteLayer(yearlyRepeatSites, { color: '#b15928', label: 'Yearly Repeat Site', showLabels: true });
+var yearlyRepeatSitesLayer = createXSiteLayer(excludeSitesByNumber(yearlyRepeatSites, statusSiteNumbers), { color: '#b15928', label: 'Yearly Repeat Site', showLabels: true });
 var permanentSitesLayer = createXSiteLayer(permanentSites, { color: '#6a3d9a', label: 'Permanent Site' });
 var hsOrkaExistingSitesLayer = createXSiteLayer(hsOrkaExistingSites, { color: '#ff7f00', label: 'HS Orka Existing Site' });
+
+function createStatusSiteLayer(numbers, collections, options) {
+    const settings = Object.assign({ color: '#000', radius: 8, label: 'Site' }, options || {});
+    const layer = L.layerGroup();
+
+    (numbers || []).forEach(function (number) {
+        const feature = findSiteFeatureByNumber(number, collections);
+        if (!feature) {
+            console.warn(settings.label + ': no matching site found for number ' + number);
+            return;
+        }
+
+        const coords = feature.geometry.coordinates;
+        const latlng = L.latLng(coords[1], coords[0]);
+        const name = feature.properties.Name;
+
+        const visibleMarker = L.circleMarker(latlng, {
+            radius: settings.radius,
+            fillColor: settings.color,
+            color: '#000',
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.9
+        });
+
+        let popupContent = `<b>${settings.label}:</b> ${name}<br>`;
+        popupContent += `<hr style="margin: 4px 0; border-top: 3px solid #aaa;">`;
+        popupContent += `<a href="#" class="navigate-link" data-lat="${latlng.lat}" data-lng="${latlng.lng}">📍 Navigate here</a>`;
+
+        visibleMarker.bindPopup(popupContent);
+
+        layer.addLayer(addTouchTarget(visibleMarker, latlng, popupContent));
+        layer.addLayer(visibleMarker);
+    });
+
+    return layer;
+}
+
+var completedSitesLayer = createStatusSiteLayer(completedSites, siteSourceCollections, { color: '#888888', radius: 8, label: 'Completed Site' });
+var runningSitesLayer = createStatusSiteLayer(runningSites, siteSourceCollections, { color: '#ffe119', radius: 8, label: 'Running Site' });
 
 function normalizeSearchText(value) {
     return String(value || "").trim().toLowerCase();
@@ -555,7 +629,9 @@ var groupedOverlays = [
             { name: "2024 Sites", layer: sites2024Layer, icon: legendSwatch('x', '#33a02c') },
             { name: "Yearly Repeat Sites", layer: yearlyRepeatSitesLayer, icon: legendSwatch('x', '#b15928') },
             { name: "Permanent Sites", layer: permanentSitesLayer, icon: legendSwatch('x', '#6a3d9a') },
-            { name: "HS Orka Existing Sites", layer: hsOrkaExistingSitesLayer, icon: legendSwatch('x', '#ff7f00') }
+            { name: "HS Orka Existing Sites", layer: hsOrkaExistingSitesLayer, icon: legendSwatch('x', '#ff7f00') },
+            { name: "Running Sites", layer: runningSitesLayer, icon: legendSwatch('dot', '#ffe119') },
+            { name: "Completed Sites", layer: completedSitesLayer, icon: legendSwatch('dot', '#888888') }
         ]
     },
     {
@@ -579,10 +655,13 @@ var groupedOverlays = [
     }
 ];
 
-// The 2026 planned sites and yearly repeat sites are visible by default; everything else is opt-in via the layer panel
+// The 2026 planned sites, yearly repeat sites, and status overlays are visible by default;
+// everything else is opt-in via the layer panel
 plannedSites2026AllLayer.addTo(map);
 plannedSites2026DifficultLayer.addTo(map);
 yearlyRepeatSitesLayer.addTo(map);
+completedSitesLayer.addTo(map);
+runningSitesLayer.addTo(map);
 
 L.control.panelLayers(baseLayers, groupedOverlays, {
     compact: true, // true = collapsed groups by default
