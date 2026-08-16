@@ -117,15 +117,15 @@
     <script type="text/javascript" src="src/js/Leaflet.LinearMeasurement.js"></script>
 
     <main id="bodyWrapper">
-        <header id="siteStatsBar" class="site-stats-bar">
+        <div id="mapWrapper">
+            <div id="map" style="height: 100%;"></div>
+        </div>
+        <footer id="siteStatsBar" class="site-stats-bar">
             <span class="site-stat site-stat-total"><span class="site-stat-value" id="statTotal">0</span><span class="site-stat-label">Total</span></span>
             <span class="site-stat site-stat-running"><span class="site-stat-value" id="statRunning">0</span><span class="site-stat-label">Running</span></span>
             <span class="site-stat site-stat-completed"><span class="site-stat-value" id="statCompleted">0</span><span class="site-stat-label">Completed</span></span>
             <span class="site-stat site-stat-remaining"><span class="site-stat-value" id="statRemaining">0</span><span class="site-stat-label">Remaining</span></span>
-        </header>
-        <div id="mapWrapper">
-            <div id="map" style="height: 100%;"></div>
-        </div>
+        </footer>
 
         </div>
 
