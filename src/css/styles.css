@@ -17,15 +17,15 @@ body,
 }
 
 #bodyWrapper > #mapWrapper {
-  flex: 1 0 auto;
-  height: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: hidden;
 }
 
 /* Map container and sizing */
 #mapWrapper {
-  flex: 1 0 auto;
-  height: 100% !important;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -33,6 +33,61 @@ body,
   height: 100%;
   width: 100%;
   position: relative;
+}
+
+/* Site status header */
+.site-stats-bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 6px 16px;
+  background: #1f2a33;
+  color: #fff;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  border-bottom: 1px solid #0f151a;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+.site-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.site-stat::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ccc;
+  flex: 0 0 auto;
+}
+
+.site-stat-running::before {
+  background: #ffe119;
+}
+
+.site-stat-completed::before {
+  background: #888888;
+}
+
+.site-stat-remaining::before {
+  background: #1f78b4;
+}
+
+.site-stat-value {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.site-stat-label {
+  opacity: 0.75;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.03em;
 }
 
 /* Easy Button (e.g. Clear Route) */
@@ -175,6 +230,28 @@ body,
 }
 
 @media (max-width: 768px) {
+  .site-stats-bar {
+    gap: 10px;
+    padding: 5px 10px;
+  }
+
+  .site-stat {
+    gap: 3px;
+  }
+
+  .site-stat::before {
+    width: 6px;
+    height: 6px;
+  }
+
+  .site-stat-value {
+    font-size: 13px;
+  }
+
+  .site-stat-label {
+    font-size: 9px;
+  }
+
   .mt-search-form,
   .mt-search-button {
     height: 36px;

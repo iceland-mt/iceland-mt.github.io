@@ -1,7 +1,7 @@
 var map = L.map('map', {
     zoom: 9,
     minZoom: 7,      // (optional) prevents zooming in beyond level 19
-    center: L.latLng([63.93, -21.66]), // Reykjanes peninsula, Iceland
+    center: L.latLng([63.93, -21.86]), // Reykjanes peninsula, Iceland
     attributionControl: true,
     contextmenu: true,
     contextmenuWidth: 180,
@@ -354,6 +354,40 @@ function createStatusSiteLayer(numbers, collections, options) {
 
 var completedSitesLayer = createStatusSiteLayer(completedSites, siteSourceCollections, { color: '#888888', radius: 8, label: 'Completed Site' });
 var runningSitesLayer = createStatusSiteLayer(runningSites, siteSourceCollections, { color: '#ffe119', radius: 8, label: 'Running Site' });
+
+function countMatchedSites(numbers, collections) {
+    return (numbers || []).reduce(function (count, number) {
+        return count + (findSiteFeatureByNumber(number, collections) ? 1 : 0);
+    }, 0);
+}
+
+(function updateSiteStatsBar() {
+    // "Difficult Access" sites are a marked subset of "All" (not a separate site group),
+    // so total is counted by unique site number rather than summed feature-list lengths.
+    const uniqueSiteNumbers = new Set();
+    siteSourceCollections.forEach(function (collection) {
+        ((collection && collection.features) || []).forEach(function (feature) {
+            const name = feature.properties && feature.properties.Name;
+            if (name) uniqueSiteNumbers.add(String(name).replace(/[^0-9]/g, ''));
+        });
+    });
+    const totalCount = uniqueSiteNumbers.size;
+    const completedCount = countMatchedSites(completedSites, siteSourceCollections);
+    const runningCount = countMatchedSites(runningSites, siteSourceCollections);
+    const remainingCount = Math.max(totalCount - completedCount - runningCount, 0);
+
+    const statValues = {
+        statTotal: totalCount,
+        statRunning: runningCount,
+        statCompleted: completedCount,
+        statRemaining: remainingCount
+    };
+
+    Object.keys(statValues).forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = statValues[id];
+    });
+})();
 
 function normalizeSearchText(value) {
     return String(value || "").trim().toLowerCase();
