@@ -1,7 +1,7 @@
 var map = L.map('map', {
     zoom: 9,
     minZoom: 7,      // (optional) prevents zooming in beyond level 19
-    center: L.latLng([63.93, -21.8romania - mt.github.io6]), // Reykjanes peninsula, Iceland
+    center: L.latLng([63.93, -21.86]), // Reykjanes peninsula, Iceland
     attributionControl: true,
     contextmenu: true,
     contextmenuWidth: 180,
