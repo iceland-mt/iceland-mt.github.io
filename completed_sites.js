@@ -5,7 +5,7 @@
 
 //  var runningSites = [545, 6144];
 
-var runningSites = [542
+var runningSites = [542,
                     682, 685, 
                     6113, 6118,
                     681,
