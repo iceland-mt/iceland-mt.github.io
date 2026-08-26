@@ -400,7 +400,7 @@ function countMatchedSites(numbers, collections) {
     // Just for fun: a one-time, dismissable "halfway there" toast once completed sites
     // cross 50%. Doesn't block anything - it's a notification like any other, and won't
     // reappear on reload within the same tab.
-    if (totalCount > 0 && completedCount / totalCount >= 0.5) {
+    if (totalCount > 0 && completedCount / totalCount >= 0.5 && completedCount / totalCount < 0.9) {
         let alreadyCelebrated = false;
         try {
             alreadyCelebrated = sessionStorage.getItem('mt-halfway-celebrated') === '1';
@@ -415,6 +415,25 @@ function countMatchedSites(numbers, collections) {
                 { timeout: 8000 }
             );
             try { sessionStorage.setItem('mt-halfway-celebrated', '1'); } catch (e) { /* ignore */ }
+        }
+    }
+
+    // Same idea at 90% - almost done, heading home soon.
+    if (totalCount > 0 && completedCount / totalCount >= 0.9) {
+        let alreadyCelebrated = false;
+        try {
+            alreadyCelebrated = sessionStorage.getItem('mt-almost-done-celebrated') === '1';
+        } catch (e) { /* sessionStorage unavailable - just show it */ }
+
+        if (!alreadyCelebrated) {
+            notification.success(
+                'Almost done!',
+                `<div class="celebration-row">
+                    <span class="celebration-emoji">🏡</span><span class="celebration-emoji">✈️</span><span class="celebration-emoji">🎉</span><span class="celebration-emoji">✈️</span><span class="celebration-emoji">🏡</span>
+                </div><div>${completedCount} of ${totalCount} sites completed - going home soon!</div>`,
+                { timeout: 8000 }
+            );
+            try { sessionStorage.setItem('mt-almost-done-celebrated', '1'); } catch (e) { /* ignore */ }
         }
     }
 })();
