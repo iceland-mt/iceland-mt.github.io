@@ -275,7 +275,7 @@ function createXSiteLayer(data, options) {
 // Those same sites are excluded from the underlying layers below so a site only ever
 // shows once, as its status marker rather than its original planned/repeat marker.
 var siteSourceCollections = [plannedSites2026All, plannedSites2026Difficult, yearlyRepeatSites];
-var statusSiteNumbers = (completedSites || []).concat(runningSites || []);
+var statusSiteNumbers = (completedSites || []).concat(runningSites || []).concat(repeatedSites || []);
 
 function findSiteFeatureByNumber(number, collections) {
     const target = String(number).trim();
@@ -339,6 +339,13 @@ function createStatusSiteLayer(numbers, collections, options) {
             fillOpacity: 0.9
         });
 
+        if (settings.showLabels) {
+            const digits = String(name).replace(/[^0-9]/g, '') || name;
+            const labelText = digits + (settings.labelSuffix || '');
+            const labelClassName = 'mt-label' + (settings.labelClassName ? ' ' + settings.labelClassName : '');
+            visibleMarker.bindTooltip(labelText, { permanent: true, direction: 'top', className: labelClassName });
+        }
+
         let popupContent = `<b>${settings.label}:</b> ${name}<br>`;
         popupContent += `<hr style="margin: 4px 0; border-top: 3px solid #aaa;">`;
         popupContent += `<a href="#" class="navigate-link" data-lat="${latlng.lat}" data-lng="${latlng.lng}">📍 Navigate here</a>`;
@@ -354,6 +361,7 @@ function createStatusSiteLayer(numbers, collections, options) {
 
 var completedSitesLayer = createStatusSiteLayer(completedSites, siteSourceCollections, { color: '#888888', radius: 8, label: 'Completed Site' });
 var runningSitesLayer = createStatusSiteLayer(runningSites, siteSourceCollections, { color: '#ffe119', radius: 8, label: 'Running Site' });
+var repeatedSitesLayer = createStatusSiteLayer(repeatedSites, siteSourceCollections, { color: '#f032e6', radius: 8, label: 'Repeated Site', showLabels: true, labelSuffix: 'R', labelClassName: 'mt-label-repeated' });
 
 function countMatchedSites(numbers, collections) {
     return (numbers || []).reduce(function (count, number) {
@@ -374,7 +382,8 @@ function countMatchedSites(numbers, collections) {
     const totalCount = uniqueSiteNumbers.size;
     const completedCount = countMatchedSites(completedSites, siteSourceCollections);
     const runningCount = countMatchedSites(runningSites, siteSourceCollections);
-    const remainingCount = Math.max(totalCount - completedCount - runningCount, 0);
+    const repeatedCount = countMatchedSites(repeatedSites, siteSourceCollections);
+    const remainingCount = Math.max(totalCount - completedCount - runningCount - repeatedCount, 0);
 
     const statValues = {
         statTotal: totalCount,
@@ -686,7 +695,8 @@ var groupedOverlays = [
             { name: "Permanent Sites", layer: permanentSitesLayer, icon: legendSwatch('x', '#6a3d9a') },
             { name: "HS Orka Existing Sites", layer: hsOrkaExistingSitesLayer, icon: legendSwatch('x', '#ff7f00') },
             { name: "Running Sites", layer: runningSitesLayer, icon: legendSwatch('dot', '#ffe119') },
-            { name: "Completed Sites", layer: completedSitesLayer, icon: legendSwatch('dot', '#888888') }
+            { name: "Completed Sites", layer: completedSitesLayer, icon: legendSwatch('dot', '#888888') },
+            { name: "Repeated Sites", layer: repeatedSitesLayer, icon: legendSwatch('dot', '#f032e6') }
         ]
     },
     {
@@ -717,6 +727,7 @@ plannedSites2026DifficultLayer.addTo(map);
 yearlyRepeatSitesLayer.addTo(map);
 completedSitesLayer.addTo(map);
 runningSitesLayer.addTo(map);
+repeatedSitesLayer.addTo(map);
 
 L.control.panelLayers(baseLayers, groupedOverlays, {
     compact: true, // true = collapsed groups by default
