@@ -383,7 +383,7 @@ function countMatchedSites(numbers, collections) {
     const completedCount = countMatchedSites(completedSites, siteSourceCollections);
     const runningCount = countMatchedSites(runningSites, siteSourceCollections);
     const repeatedCount = countMatchedSites(repeatedSites, siteSourceCollections);
-    const remainingCount = Math.max(totalCount - completedCount - runningCount - repeatedCount, 0);
+    const remainingCount = Math.max(totalCount - completedCount - runningCount, 0);
 
     const statValues = {
         statTotal: totalCount,
