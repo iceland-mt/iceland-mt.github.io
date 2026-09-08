@@ -5,7 +5,7 @@
 
 //  var runningSites = [545, 6144];
 
-var runningSites = [688, 6101,
+var runningSites = [
     693,
     692,
     6128, 6111,
@@ -13,6 +13,8 @@ var runningSites = [688, 6101,
 ];
 
 var repeatedSites = [6113]
+
+var referenceSites = [688, 6101]
 
 var completedSites = [555, 566, 575,
     572, 550, 556,

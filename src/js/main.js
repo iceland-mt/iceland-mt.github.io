@@ -275,7 +275,7 @@ function createXSiteLayer(data, options) {
 // Those same sites are excluded from the underlying layers below so a site only ever
 // shows once, as its status marker rather than its original planned/repeat marker.
 var siteSourceCollections = [plannedSites2026All, plannedSites2026Difficult, yearlyRepeatSites];
-var statusSiteNumbers = (completedSites || []).concat(runningSites || []).concat(repeatedSites || []);
+var statusSiteNumbers = (completedSites || []).concat(runningSites || []).concat(repeatedSites || []).concat(referenceSites || []);
 
 function findSiteFeatureByNumber(number, collections) {
     const target = String(number).trim();
@@ -362,6 +362,7 @@ function createStatusSiteLayer(numbers, collections, options) {
 var completedSitesLayer = createStatusSiteLayer(completedSites, siteSourceCollections, { color: '#888888', radius: 8, label: 'Completed Site' });
 var runningSitesLayer = createStatusSiteLayer(runningSites, siteSourceCollections, { color: '#ffe119', radius: 8, label: 'Running Site' });
 var repeatedSitesLayer = createStatusSiteLayer(repeatedSites, siteSourceCollections, { color: '#f032e6', radius: 8, label: 'Repeated Site', showLabels: true, labelSuffix: 'R', labelClassName: 'mt-label-repeated' });
+var referenceSitesLayer = createStatusSiteLayer(referenceSites, siteSourceCollections, { color: '#da9100', radius: 8, label: 'Reference Site' });
 
 function countMatchedSites(numbers, collections) {
     return (numbers || []).reduce(function (count, number) {
@@ -383,7 +384,8 @@ function countMatchedSites(numbers, collections) {
     const completedCount = countMatchedSites(completedSites, siteSourceCollections);
     const runningCount = countMatchedSites(runningSites, siteSourceCollections);
     const repeatedCount = countMatchedSites(repeatedSites, siteSourceCollections);
-    const remainingCount = Math.max(totalCount - completedCount - runningCount, 0);
+    const referenceCount = countMatchedSites(referenceSites, siteSourceCollections);
+    const remainingCount = Math.max(totalCount - completedCount - runningCount - referenceCount, 0);
 
     const statValues = {
         statTotal: totalCount,
@@ -715,7 +717,8 @@ var groupedOverlays = [
             { name: "HS Orka Existing Sites", layer: hsOrkaExistingSitesLayer, icon: legendSwatch('x', '#ff7f00') },
             { name: "Running Sites", layer: runningSitesLayer, icon: legendSwatch('dot', '#ffe119') },
             { name: "Completed Sites", layer: completedSitesLayer, icon: legendSwatch('dot', '#888888') },
-            { name: "Repeated Sites", layer: repeatedSitesLayer, icon: legendSwatch('dot', '#f032e6') }
+            { name: "Repeated Sites", layer: repeatedSitesLayer, icon: legendSwatch('dot', '#f032e6') },
+            { name: "Reference Sites", layer: referenceSitesLayer, icon: legendSwatch('dot', '#da9100') }
         ]
     },
     {
@@ -747,6 +750,7 @@ yearlyRepeatSitesLayer.addTo(map);
 completedSitesLayer.addTo(map);
 runningSitesLayer.addTo(map);
 repeatedSitesLayer.addTo(map);
+referenceSitesLayer.addTo(map);
 
 L.control.panelLayers(baseLayers, groupedOverlays, {
     compact: true, // true = collapsed groups by default
