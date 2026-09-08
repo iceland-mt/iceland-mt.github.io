@@ -382,10 +382,11 @@ function countMatchedSites(numbers, collections) {
     });
     const totalCount = uniqueSiteNumbers.size;
     const completedCount = countMatchedSites(completedSites, siteSourceCollections);
-    const runningCount = countMatchedSites(runningSites, siteSourceCollections);
     const repeatedCount = countMatchedSites(repeatedSites, siteSourceCollections);
     const referenceCount = countMatchedSites(referenceSites, siteSourceCollections);
-    const remainingCount = Math.max(totalCount - completedCount - runningCount - referenceCount, 0);
+    const runningOnlyCount = countMatchedSites(runningSites, siteSourceCollections);
+    const runningCount = runningOnlyCount + referenceCount;
+    const remainingCount = Math.max(totalCount - completedCount - runningCount, 0);
 
     const statValues = {
         statTotal: totalCount,
