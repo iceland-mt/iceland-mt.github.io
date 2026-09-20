@@ -6,7 +6,6 @@
 //  var runningSites = [545, 6144];
 
 var runningSites = [
-    698,
     6124, 6143, 6126
 ];
 
@@ -53,7 +52,8 @@ var completedSites = [555, 566, 575,
     6108, 6102, 697,
     6113, 693,
     6116, 6117,
-    6103, 6105              
+    6103, 6105,
+    698, 
 ];
 
 // var needrepeatSites = [6113, ]
